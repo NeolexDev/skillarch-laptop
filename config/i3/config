@@ -30,6 +30,7 @@ exec_always --no-startup-id ~/.config/polybar/launch.sh &> /var/tmp/polybar.log
 exec_always --no-startup-id pgrep --exact VBoxService &> /dev/null && killall VBoxClient ; VBoxClient-all
 exec_always --no-startup-id bash -c "killall -q picom ; grep -qF hypervisor /proc/cpuinfo || picom"
 exec_always --no-startup-id i3-battery-popup
+exec_always --no-startup-id /usr/bin/spice-vdagent
 exec_always --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 # The combination of xss-lock, nm-applet and pactl is a popular choice, so
 # they are included here as an example. Modify as you see fit.
@@ -60,7 +61,7 @@ floating_modifier $mod
 tiling_drag modifier titlebar
 
 # start a terminal
-bindsym $mod+Return exec /usr/bin/alacritty
+bindsym $mod+Return exec /usr/bin/kitty
 bindsym $mod+Shift+Return exec /usr/bin/firefox
 
 # kill focused window
@@ -221,16 +222,17 @@ for_window [title="^Volume Control$"] floating enable
 
 # Add new rules for floating windows
 for_window [floating] resize set 1536 864, resize set 1536 864, move position 192 108
+# Fix for floating i3 popups in burpsuite
+for_window [class="install4j-burp-StartBurp" title="^win[0-9]+$"] kill
 
 # HELP
 
-bindsym $mod+Control+h exec alacritty --title "Help: SkillArch packages" -e zsh -ic "ska-help-packages"
+bindsym $mod+Control+h exec kitty --title "Help: SkillArch packages" -e zsh -ic "ska-help-packages"
 
 
 # keyboard layout
 exec_always --no-startup-id /bin/bash -c "setxkbmap -layout us -variant intl -option 'caps:swapescape'"
 # Start apps at startup
-exec --no-startup-id SHIORI_DIR=/home/neolex/shiori shiori server --port 5343
 exec --no-startup-id greenclip daemon
 exec --no-startup-id /usr/bin/nitrogen --restore
 exec --no-startup-id thunderbird
@@ -292,11 +294,11 @@ bindsym $mod+Shift+b exec --no-startup-id ~/.local/bin/set-default-browser
 bindsym $mod+Mod1+Return mode "$mode_launcher"
 set $mode_launcher Term: [b]ug.neolex.dev [p]ython [n]node [r]aspberrypi [d]ns
 mode "$mode_launcher" {
-    bindsym b exec alacritty -e ssh neolex@bug.neolex.dev; mode "default"
-    bindsym r exec alacritty -e ssh pi@192.168.1.138; mode "default"
-    bindsym p exec alacritty -e python; mode "default"
-    bindsym n exec alacritty -e node; mode "default"
-    bindsym d exec alacritty -e ssh neolex@bug.neolex.dev -t tmux attach -t dns || tmux new -s dns ; mode "default"
+    bindsym b exec kitty -e ssh neolex@bug.neolex.dev; mode "default"
+    bindsym r exec kitty -e ssh neolex@192.168.1.138; mode "default
+    bindsym p exec kitty -e python; mode "default"
+    bindsym n exec kitty -e node; mode "default"
+    bindsym d exec kitty -e ssh neolex@bug.neolex.dev -t "tmux attach -t dns || tmux new -s dns" ; mode "default"
     bindsym Escape mode "default"
     bindsym Return mode "default"
 }
@@ -306,3 +308,6 @@ bindsym $mod+Tab workspace back_and_forth
 for_window [class="Emote"] floating enable, move position mouse
 
 
+# BugTime (Timewarrior + Rofi)
+bindsym $mod+F5 exec --no-startup-id ~/.local/bin/bugtime-start
+bindsym $mod+F6 exec --no-startup-id ~/.local/bin/bugtime-stop
