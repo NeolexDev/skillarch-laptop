@@ -17,6 +17,7 @@ sanity-check:
 	@# Ensure we are in /opt/skillarch or /opt/skillarch-original (maintainer only)
 	@[ "$$(pwd)" != "/opt/skillarch" ] && [ "$$(pwd)" != "/opt/skillarch-original" ] && echo "You must be in /opt/skillarch or /opt/skillarch-original to run this command" && exit 1
 	@sudo -v || (echo "Error: sudo access is required" ; exit 1)
+	[ ! -f /.dockerenv ] && systemd-inhibit --what sleep:idle sleep 3600 &
 
 install-base: sanity-check ## Install base packages
 	# Clean up, Update, Basics
@@ -59,13 +60,20 @@ install-cli-tools: sanity-check ## Install system packages
 	# Install pipx & tools
 	yay --noconfirm --needed -S python-pipx
 	pipx ensurepath
-	for package in argcomplete bypass-url-parser dirsearch exegol pre-commit sqlmap wafw00f yt-dlp semgrep defaultcreds-cheat-sheet; do pipx install -q "$$package" && pipx inject -q "$$package" setuptools; done
+	for package in argcomplete bypass-url-parser dirsearch exegol pre-commit sqlmap wafw00f yt-dlp semgrep defaultcreds-cheat-sheet; do 
+		pipx install -q "$$package" && pipx inject -q "$$package" setuptools
+		# If this fails, uninstall and reinstall
+		if [ $$? -ne 0 ]; then
+			pipx uninstall "$$package"
+			pipx install -q "$$package" && pipx inject -q "$$package" setuptools
+		fi
+	done
 
 	# Install mise and all php-build dependencies
 	yes|sudo pacman -S --noconfirm --needed mise libedit libffi libjpeg-turbo libpcap libpng libxml2 libzip postgresql-libs php-gd
 	# mise self-update # Currently broken, wait for upstream fix, pinged on 17/03/2025
 	sleep 30
-	for package in usage pdm rust terraform golang python nodejs; do mise use -g "$$package@latest" ; sleep 10; done
+	for package in usage pdm rust terraform golang python nodejs uv; do mise use -g "$$package@latest" ; sleep 10; done
 	mise exec -- go env -w "GOPATH=/home/$$USER/.local/go"
 	make clean
 
@@ -146,9 +154,9 @@ install-gui: sanity-check ## Install gui, i3, polybar, kitty, rofi, picom
 	make clean
 
 install-gui-tools: sanity-check ## Install system packages
-	yes|sudo pacman -S --noconfirm --needed vlc-luajit # Must be done before obs-studio-browser to avoid conflicts
-	yes|sudo pacman -S --noconfirm --needed arandr blueman cheese visual-studio-code-bin discord dunst filezilla flameshot ghex google-chrome gparted kdenlive kompare libreoffice-fresh meld okular qbittorrent torbrowser-launcher wireshark-qt ghidra signal-desktop dragon-drop-git nomachine emote guvcview audacity polkit-gnome
-	yes|sudo pacman -S --needed obs-studio-browser
+	yes|sudo pacman -S --noconfirm --needed vlc vlc-plugin-ffmpeg flatpak arandr blueman visual-studio-code-bin discord dunst filezilla flameshot ghex google-chrome gparted kdenlive kompare libreoffice-fresh meld okular qbittorrent torbrowser-launcher wireshark-qt ghidra signal-desktop dragon-drop-git nomachine emote guvcview audacity polkit-gnome
+	flatpak install -y flathub com.obsproject.Studio
+	flatpak install -y flathub org.gnome.Snapshot
 	# Do not start services in docker
 	[ ! -f /.dockerenv ] && sudo systemctl disable --now nxserver.service
 	xargs -n1 -I{} code --install-extension {} --force < config/extensions.txt
@@ -160,6 +168,7 @@ install-offensive: sanity-check ## Install offensive tools
 	yes|sudo pacman -S --noconfirm --needed metasploit fx lazygit fq gitleaks jdk21-openjdk burpsuite hashcat bettercap
 	sudo sed -i 's#$JAVA_HOME#/usr/lib/jvm/java-21-openjdk#g' /usr/bin/burpsuite
 	yay --noconfirm --needed -S ffuf gau pdtm-bin waybackurls fabric-ai-bin
+	[ -f /usr/bin/pdtm ] && sudo chown "$$USER:$$USER" /usr/bin/pdtm && sudo mv /usr/bin/pdtm ~/.pdtm/go/bin
 
 	# Hide stdout and Keep stderr for CI builds
 	mise exec -- go install github.com/sw33tLie/sns@latest > /dev/null
@@ -168,6 +177,7 @@ install-offensive: sanity-check ## Install offensive tools
 	mise exec -- go install github.com/sensepost/gowitness@latest > /dev/null
 	sleep 30
 	zsh -c "source ~/.zshrc && pdtm -install-all -v"
+	zsh -c "source ~/.zshrc && pdtm -update-all -v"
 	zsh -c "source ~/.zshrc && nuclei -update-templates -update-template-dir ~/.nuclei-templates"
 
 	# Clone custom tools

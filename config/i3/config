@@ -63,15 +63,16 @@ tiling_drag modifier titlebar
 
 # start a terminal
 bindsym $mod+Return exec /usr/bin/alacritty
-bindsym $mod+Shift+Return exec /usr/bin/google-chome-stable
+bindsym $mod+Shift+Return exec /usr/bin/google-chrome-stable
 
 # kill focused window
 bindsym $mod+Shift+Q kill
 
 # start dmenu (a program launcher)
 bindsym $mod+space exec --no-startup-id rofi -show drun
-bindsym $mod+Shift+space exec --no-startup-id env PATH="$HOME/.local/bin:$PATH" rofi -show run
+bindsym $mod+Shift+space exec --no-startup-id  env PATH="$HOME/.local/bin:$PATH"rofi -show run
 bindsym $mod+Control+space exec --no-startup-id rofi -show window
+
 
 # A more modern dmenu replacement is rofi:
 # bindcode $mod+40 exec "rofi -modi drun,run -show drun"
@@ -188,7 +189,7 @@ gaps outer 0
 
 bindsym $mod+p exec flameshot gui
 bindsym $mod+Shift+p exec flameshot full -p ~/Pictures/
-bindsym $mod+s exec pavucontrol
+bindsym $mod+s exec ~/.local/bin/switch-audio-output
 bindsym $mod+shift+s exec XDG_CURRENT_DESKTOP=GNOME gnome-control-center
 bindsym $mod+e exec emote
 bindsym $mod+b exec blueman-manager
@@ -239,7 +240,7 @@ exec --no-startup-id /usr/bin/nitrogen --restore
 exec --no-startup-id thunderbird
 exec --no-startup-id obsidian
 exec --no-startup-id discord
-exec --no-startup-id google-chome-stable
+exec --no-startup-id google-chrome-stable
 exec --no-startup-id caido
 exec --no-startup-id chromium
 exec --no-startup-id synology-drive
@@ -291,7 +292,7 @@ bindsym $mod+Shift+Control+0 move container to workspace 20
 # shortcuts
 bindsym $mod+asterisk exec rofi -modi "clipboard:greenclip print" -show clipboard -run-command '{cmd}' 
 bindsym $mod+Mod1+BackSpace layout toggle split
-bindsym $mod+dead_circumflex exec /home/neolex/.local/bin/neocr
+bindsym $mod+dead_circumflex exec env PATH="$HOME/.local/bin:$PATH" neocr
 
 
 bindsym $mod+Shift+b exec --no-startup-id ~/.local/bin/set-default-browser
@@ -313,7 +314,8 @@ bindsym $mod+Tab workspace back_and_forth
 for_window [class="Emote"] floating enable, move position mouse
 
 
+bindsym $mod+g exec ~/.local/bin/guitarec
 # BugTime (Timewarrior + Rofi)
 bindsym $mod+F5 exec --no-startup-id ~/.local/bin/bugtime-start
 bindsym $mod+F6 exec --no-startup-id ~/.local/bin/bugtime-stop
-bindsym $mod+F7 exec --no-startup-id ~/.local/bin/bugtime-add
+  bindsym $mod+F7 exec --no-startup-id ~/.local/bin/bugtime-add
