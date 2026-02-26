@@ -1,1 +1,0 @@
-/home/neolex/.config/polybar/scripts/scroll_tidal_status.sh
