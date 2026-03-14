@@ -109,6 +109,7 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	$(call INFO,Installing CLI tools & runtimes...)
 	$(PACMAN_INSTALL) base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xclip xz yay zip veracrypt git-delta viu qsv asciinema htmlq neovim glow jless websocat superfile gron eza fastfetch bat sysstat cronie tree-sitter
 	sudo ln -sf /usr/bin/bat /usr/local/bin/batcat
+	bash -c "$$(curl -fsSL https://ollama.com/install.sh | sh)" || true
 	bash -c "$$(curl -fsSL https://gef.blah.cat/sh)" || true
 	[[ ! -f ~/.gdbinit-gef.py ]] && curl -fsSL -o ~/.gdbinit-gef.py https://raw.githubusercontent.com/hugsy/gef/main/gef.py && echo "source ~/.gdbinit-gef.py" >> ~/.gdbinit || echo "gef already installed"
 	# nvim config
@@ -174,8 +175,8 @@ install-docker: sanity-check ## Install Docker & Docker Compose
 install-gui: sanity-check ## Install i3, polybar, kitty, rofi, picom
 	$(call INFO,Installing GUI & window manager...)
 	[[ ! -f /etc/machine-id ]] && sudo systemd-machine-id-setup || true
-	$(PACMAN_INSTALL) xorg-server i3-gaps i3blocks i3lock i3lock-fancy-git i3status dmenu feh rofi nm-connection-editor picom polybar kitty brightnessctl xorg-xhost
-	yay --noconfirm --needed -S rofi-power-menu i3-battery-popup-git
+	$(PACMAN_INSTALL) xorg-server i3-gaps i3blocks i3lock i3lock-fancy-git i3status dmenu thunderbird feh rofi nm-connection-editor picom polybar kitty brightnessctl xorg-xhost
+	yay --noconfirm --needed -S rofi-power-menu i3-battery-popup-git nitrogen zscroll-git  
 	gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 
 	# i3 config
@@ -186,7 +187,8 @@ install-gui: sanity-check ## Install i3, polybar, kitty, rofi, picom
 	[[ ! -d ~/.config/polybar ]] && mkdir -p ~/.config/polybar || true
 	$(call ska-link,/opt/skillarch/config/polybar/config.ini,$$HOME/.config/polybar/config.ini)
 	$(call ska-link,/opt/skillarch/config/polybar/launch.sh,$$HOME/.config/polybar/launch.sh)
-
+	$(call ska-link,/opt/skillarch/config/polybar/scripts/tidal.sh,$$HOME/.config/polybar/scripts/tidal.sh)
+	$(call ska-link,/opt/skillarch/config/polybar/scripts/scroll_tidal_status.sh,$$HOME/.config/polybar/scripts/scroll_tidal_status.sh)
 	# rofi config
 	[[ ! -d ~/.config/rofi ]] && mkdir -p ~/.config/rofi || true
 	$(call ska-link,/opt/skillarch/config/rofi/config.rasi,$$HOME/.config/rofi/config.rasi)
